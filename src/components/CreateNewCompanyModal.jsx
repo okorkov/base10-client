@@ -15,6 +15,8 @@ import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import Chip from '@mui/material/Chip';
 import axios from 'axios';
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
 
 function getStyles(name, personName, theme) {
   return {
@@ -50,6 +52,7 @@ export default function CreateNewCompanyModal({ open, setOpen, industries, busin
     country: '',
     companyLogoLink: ''
   });
+  const [showBackdrop, setShowBackdrop] = React.useState(false);
 
   const handleClose = () => {
     setOpen(false);
@@ -59,6 +62,8 @@ export default function CreateNewCompanyModal({ open, setOpen, industries, busin
       country: '',
       companyLogoLink: ''
     });
+    setSelectedBusinessModels([]);
+    setSelectedIndustries([]);
   };
 
   const handleIndustryChange = (event) => {
@@ -94,17 +99,20 @@ export default function CreateNewCompanyModal({ open, setOpen, industries, busin
       industries: selectedIndustries,
       business_models: selectedBusinessModels
     }
-
+    setShowBackdrop(true);
     axios.post('http://localhost:3000/companies', {new_company: newCompany})
       .then(response => {
         if(response.data.status === 'failed') {
           alert(response.data.errors[0])
         } else {
-          setCompanies(response.data)
+          setCompanies(response.data);
+          handleClose();
         }
+        setShowBackdrop(false);
       })
       .catch(err => {
         alert(err.message)
+        setShowBackdrop(false);
       })
   }
 
@@ -123,7 +131,7 @@ export default function CreateNewCompanyModal({ open, setOpen, industries, busin
             <p>name</p>
             <hr />
             <br />
-            <TextField onChange={handleTextInputChange} id="outlined-basic" label="Company Name" name="name" variant="outlined" required />
+            <TextField onChange={handleTextInputChange} value={newCompanyState.name} id="outlined-basic" label="Company Name" name="name" variant="outlined" required />
             <br /><br />
             <InputLabel id="demo-multiple-chip-label">Select Industries</InputLabel>
             <Select
@@ -184,12 +192,12 @@ export default function CreateNewCompanyModal({ open, setOpen, industries, busin
 
             <hr />
             <br />
-            <TextField onChange={handleTextInputChange} id="outlined-basic" label="City" name="city" variant="outlined" required />
-            <TextField onChange={handleTextInputChange} id="outlined-basic" label="Country" name="country" variant="outlined" required />
+            <TextField value={newCompanyState.city} onChange={handleTextInputChange} id="outlined-basic" label="City" name="city" variant="outlined" required />
+            <TextField value={newCompanyState.country} onChange={handleTextInputChange} id="outlined-basic" label="Country" name="country" variant="outlined" required />
             <hr />
             <br />
             <p>misc.</p>
-            <TextField onChange={handleTextInputChange} id="outlined-basic" label="Company Logo Link" name="companyLogoLink" variant="outlined" />
+            <TextField value={newCompanyState.companyLogoLink} onChange={handleTextInputChange} id="outlined-basic" label="Company Logo Link" name="companyLogoLink" variant="outlined" />
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -197,6 +205,12 @@ export default function CreateNewCompanyModal({ open, setOpen, industries, busin
           <Button onClick={handleNewCompanySubmitted} style={{ color: 'green' }}>Create</Button>
         </DialogActions>
       </Dialog>
+      <Backdrop
+        sx={{ color: '#fff', zIndex: 999999 }}
+        open={showBackdrop}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
     </div>
   );
 }
