@@ -67,7 +67,7 @@ export default function CompanyModal({ viewCompanyDetailsModal, setViewCompanyDe
   const handleAddNewRecord = (newRecordState) => {
 // debugger
     setShowBackdrop(true);
-    axios.post(`https://base10-be-42ea30d735de.herokuapp.com/companies/${viewCompanyDetailsModal?.item?.id}/financial_data`, { new_record: newRecordState })
+    axios.post(`https://base10-be-a552f44bf366.herokuapp.com/companies/${viewCompanyDetailsModal?.item?.id}/financial_data`, { new_record: newRecordState })
       .then(response => {
         setShowBackdrop(false);
         if (response.data.status === 'failed') {
