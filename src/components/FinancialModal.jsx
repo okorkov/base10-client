@@ -11,17 +11,19 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import CloseIcon from '@mui/icons-material/Close';
 import Slide from '@mui/material/Slide';
+import CreateNewFinancialRecordModal from './CreateNewFinancialRecordModal';
+import axios from 'axios';
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export default function CompanyModal({ viewCompanyDetailsModal, setViewCompanyDetailsModal }) {
+export default function CompanyModal({ viewCompanyDetailsModal, setViewCompanyDetailsModal, setCompanies, companies }) {
+  const [isNewRecordModalOpen, setIsNewRecordModalOpen] = React.useState(false);
+  const [showBackdrop, setShowBackdrop] = React.useState(false);
 
-  React.useEffect(() => {
-
-  }, [viewCompanyDetailsModal.item]);
-  
   const handleClose = () => {
     setViewCompanyDetailsModal({ open: false, item: null });
   };
@@ -31,39 +33,61 @@ export default function CompanyModal({ viewCompanyDetailsModal, setViewCompanyDe
 
     return data.map(item => {
       let multiplier;
-        
+
       switch(item.data_period) {
-          case 'month':
-              multiplier = 12;
-              break;
-          case 'quarter':
-              multiplier = 4;
-              break;
-          default:  // 'annual' or any other unexpected value
-              multiplier = 1;
+        case 'month':
+          multiplier = 12;
+          break;
+        case 'quarter':
+          multiplier = 4;
+          break;
+        default:  // 'annual' or any other unexpected value
+          multiplier = 1;
       }
-      
+
       return {
-          ...item,
-          revenue: item.revenue ? (parseFloat(item.revenue) * multiplier).toFixed(2) : null,
-          burn: item.burn ? (parseFloat(item.burn) * multiplier).toFixed(2) : null,
-          gp_pct: item.gp_pct ? parseFloat(item.gp_pct).toFixed(2) : null,  // percentage; no change
-          gp_amount: item.gp_amount ? (parseFloat(item.gp_amount) * multiplier).toFixed(2) : null,
-          ebitda: item.ebitda ? (parseFloat(item.ebitda) * multiplier).toFixed(2) : null,
-          cash: item.cash ? (parseFloat(item.cash) * multiplier).toFixed(2) : null,
-          ltv: item.ltv ? (parseFloat(item.ltv) * multiplier).toFixed(2) : null,
-          cac: item.cac ? (parseFloat(item.cac) * multiplier).toFixed(2) : null,
-          arpu: item.arpu ? (parseFloat(item.arpu) * multiplier).toFixed(2) : null,
-          customer_count: item.customer_count ? (parseFloat(item.customer_count) * multiplier).toFixed(0) : null,
-          data_period: 'annual'
+        ...item,
+        revenue: item.revenue ? (parseFloat(item.revenue) * multiplier).toFixed(2) : null,
+        burn: item.burn ? (parseFloat(item.burn) * multiplier).toFixed(2) : null,
+        gp_pct: item.gp_pct ? parseFloat(item.gp_pct).toFixed(2) : null,  // percentage; no change
+        gp_amount: item.gp_amount ? (parseFloat(item.gp_amount) * multiplier).toFixed(2) : null,
+        ebitda: item.ebitda ? (parseFloat(item.ebitda) * multiplier).toFixed(2) : null,
+        cash: item.cash ? (parseFloat(item.cash) * multiplier).toFixed(2) : null,
+        ltv: item.ltv ? (parseFloat(item.ltv) * multiplier).toFixed(2) : null,
+        cac: item.cac ? (parseFloat(item.cac) * multiplier).toFixed(2) : null,
+        arpu: item.arpu ? (parseFloat(item.arpu) * multiplier).toFixed(2) : null,
+        customer_count: item.customer_count ? (parseFloat(item.customer_count) * multiplier).toFixed(0) : null,
+        data_period: 'annual'
       };
     });
-}
+  }
 
   const annualizedData = annualize(viewCompanyDetailsModal?.item?.financial_data);
 
-  const handleAddNewRecord = () => {
+  const handleAddNewRecord = (newRecordState) => {
+// debugger
+    setShowBackdrop(true);
+    axios.post(`http://localhost:3000/companies/${viewCompanyDetailsModal?.item?.id}/financial_data`, { new_record: newRecordState })
+      .then(response => {
+        setShowBackdrop(false);
+        if (response.data.status === 'failed') {
+          alert(response.data.errors[0])
+        } else {
+          setCompanies(response.data);
+          setIsNewRecordModalOpen(false);
+          // update modal
+          const updatedCompanyData = response.data.filter(company => company.id === viewCompanyDetailsModal?.item?.id)[0];
+          setViewCompanyDetailsModal({
+            ...viewCompanyDetailsModal,
+            item: updatedCompanyData
+          })
 
+        }
+      })
+      .catch(err => {
+        setShowBackdrop(false);
+        alert(err.message);
+      })
   }
 
   return (
@@ -73,6 +97,7 @@ export default function CompanyModal({ viewCompanyDetailsModal, setViewCompanyDe
         open={viewCompanyDetailsModal.open}
         onClose={handleClose}
         TransitionComponent={Transition}
+        sx={{ zIndex: 99 }}
       >
         <AppBar sx={{ position: 'relative' }}>
           <Toolbar>
@@ -115,8 +140,8 @@ export default function CompanyModal({ viewCompanyDetailsModal, setViewCompanyDe
                     </thead>
                     <tbody>
                       {
-                       annualizedData?.map(data => {
-                          return(
+                        annualizedData?.map(data => {
+                          return (
                             <tr className="border-b dark:border-neutral-500">
                               <td className="whitespace-nowrap px-6 py-4">{data.created_at ? new Date(data.created_at).toDateString() : ""}</td>
                               <td className="whitespace-nowrap px-6 py-4">{data.data_period}</td>
@@ -135,9 +160,9 @@ export default function CompanyModal({ viewCompanyDetailsModal, setViewCompanyDe
                       }
                     </tbody>
                   </table>
-                    {!viewCompanyDetailsModal?.item?.financial_data?.length ? <p className="text-center pt-4 font-bold">No Records</p> : null}
+                  {!viewCompanyDetailsModal?.item?.financial_data?.length ? <p className="text-center pt-4 font-bold">No Records</p> : null}
                   <div className="flex justify-center pt-6">
-                    <button onClick={handleAddNewRecord} className="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Add New Record</button>
+                    <button onClick={() => setIsNewRecordModalOpen(true)} className="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Add New Record</button>
                   </div>
                 </div>
               </div>
@@ -145,6 +170,19 @@ export default function CompanyModal({ viewCompanyDetailsModal, setViewCompanyDe
           </div>
         </List>
       </Dialog>
+
+      <CreateNewFinancialRecordModal
+        isNewRecordModalOpen={isNewRecordModalOpen}
+        setIsNewRecordModalOpen={setIsNewRecordModalOpen}
+        onSubmit={handleAddNewRecord}
+        company={viewCompanyDetailsModal?.item}
+      />
+      <Backdrop
+        sx={{ color: '#fff', zIndex: 999999 }}
+        open={showBackdrop}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
     </div>
   );
 }

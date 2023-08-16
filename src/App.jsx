@@ -127,19 +127,19 @@ function App() {
                 </tbody>
               </table>
               {!companies.length ? <div className="flex justify-center">
-                  <Stack sx={{ width: '100%', color: 'grey.500' }} spacing={2}>
-                    <LinearProgress color="secondary" />
-                    <LinearProgress color="success" />
-                    <LinearProgress color="inherit" />
-                  </Stack>
-                </div> : null}
+                <Stack sx={{ width: '100%', color: 'grey.500' }} spacing={2}>
+                  <LinearProgress color="secondary" />
+                  <LinearProgress color="success" />
+                  <LinearProgress color="inherit" />
+                </Stack>
+              </div> : null}
             </div>
           </div>
         </div>
       </div>
 
       <CreateNewCompanyModal setCompanies={setCompanies} industries={industries} businessModels={businessModels} open={isAddNewEntryModalOpen} setOpen={setAddNewEntryIsModalOpen} />
-      <CompanyModal viewCompanyDetailsModal={viewCompanyDetailsModal} setViewCompanyDetailsModal={setViewCompanyDetailsModal} />
+      <CompanyModal viewCompanyDetailsModal={viewCompanyDetailsModal} setViewCompanyDetailsModal={setViewCompanyDetailsModal} setCompanies={setCompanies} companies={companies}/>
     </>
   )
 }

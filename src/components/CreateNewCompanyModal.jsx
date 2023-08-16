@@ -100,9 +100,9 @@ export default function CreateNewCompanyModal({ open, setOpen, industries, busin
       business_models: selectedBusinessModels
     }
     setShowBackdrop(true);
-    axios.post('http://localhost:3000/companies', {new_company: newCompany})
+    axios.post('http://localhost:3000/companies', { new_company: newCompany })
       .then(response => {
-        if(response.data.status === 'failed') {
+        if (response.data.status === 'failed') {
           alert(response.data.errors[0])
         } else {
           setCompanies(response.data);
@@ -160,7 +160,6 @@ export default function CreateNewCompanyModal({ open, setOpen, industries, busin
                 </MenuItem>
               ))}
             </Select>
-            
             <br /><br />
             <InputLabel id="demo-multiple-chip-label">Select Business Models</InputLabel>
             <Select
