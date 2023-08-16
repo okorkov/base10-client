@@ -100,7 +100,7 @@ export default function CreateNewCompanyModal({ open, setOpen, industries, busin
       business_models: selectedBusinessModels
     }
     setShowBackdrop(true);
-    axios.post('http://localhost:3000/companies', { new_company: newCompany })
+    axios.post('https://base10-be-42ea30d735de.herokuapp.com/companies', { new_company: newCompany })
       .then(response => {
         if (response.data.status === 'failed') {
           alert(response.data.errors[0])

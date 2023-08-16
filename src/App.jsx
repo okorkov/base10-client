@@ -13,21 +13,21 @@ function App() {
   const [viewCompanyDetailsModal, setViewCompanyDetailsModal] = useState({ open: false, item: {} });
 
   useEffect(() => {
-    axios.get('http://localhost:3000/companies')
+    axios.get('https://base10-be-42ea30d735de.herokuapp.com/companies')
       .then((response) => {
         setCompanies(response.data)
       })
       .catch((error) => {
         alert(error);
       })
-    axios.get('http://localhost:3000/get_industries')
+    axios.get('https://base10-be-42ea30d735de.herokuapp.com/get_industries')
       .then((response) => {
         setIndustries(response.data)
       })
       .catch((error) => {
         alert(error);
       })
-    axios.get('http://localhost:3000/get_business_models')
+    axios.get('https://base10-be-42ea30d735de.herokuapp.com/get_business_models')
       .then((response) => {
         setBusinessModels(response.data)
       })
