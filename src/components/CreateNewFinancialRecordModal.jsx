@@ -69,7 +69,7 @@ export default function CreateNewFinancialRecordModal({
 
   const handleNumberInput = (e) => {
     const value = e.target.value;
-    const regex = /^-?(\d+\.?\d*|\.\d+)$/;
+    const regex = /^-?(\d+\.?\d*|\.\d+)?$/;
 
     if (value === "" || regex.test(value)) {
       setNewRecordState({
